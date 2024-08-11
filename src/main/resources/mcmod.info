@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "sabotador",
+    "name": "Sabotador Helper",
+    "description": "Um helper para o minigame de sabotador disponível no sabotador.com",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": ["D4rkness_King"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

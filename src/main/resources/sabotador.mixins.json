@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.7",
+  "package": "io.github.lucaargolo.sabotador.mixin",
+  "refmap": "sabotador.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "GuiChatMixin",
+    "NetHandlerPlayClientMixin",
+    "GameSettingsMixin",
+    "GuiIngameMixin",
+    "MinecraftMixin",
+    "GuiPlayerTabOverlayAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
