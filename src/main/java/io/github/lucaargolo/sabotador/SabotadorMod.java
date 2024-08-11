@@ -17,6 +17,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.Tuple;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -86,7 +87,29 @@ public class SabotadorMod {
     }
 
     @SubscribeEvent
-    public void onChat(RenderGameOverlayEvent.Chat event) {
+    public void onChat(ClientChatReceivedEvent event) {
+        Minecraft client = Minecraft.getMinecraft();
+        if (SabotadorMod.isOnSabotador() && SabotadorConfig.getConfig().isSecondChatEnabled() && event.type != 2) {
+            IChatComponent message = event.message;
+            String u = message.getUnformattedText();
+            for (String s : SabotadorConfig.getConfig().getSecondChatFilter()) {
+                if(u.startsWith(s)) {
+                    ((GuiIngameMixed) client.ingameGUI).getSecondChat().printChatMessage(message);
+                    event.message = null;
+                    break;
+                }
+            }
+            for (String s : SabotadorConfig.getConfig().getBothChatsFilter()) {
+                if(u.startsWith(s)) {
+                    ((GuiIngameMixed) client.ingameGUI).getSecondChat().printChatMessage(message);
+                    break;
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onRenderChat(RenderGameOverlayEvent.Chat event) {
         Minecraft client = Minecraft.getMinecraft();
         if(SabotadorMod.isOnSabotadorFast() && SabotadorConfig.getConfig().isSecondChatEnabled()) {
             ScreenPosition position = SabotadorConfig.getConfig().getChatPosition();

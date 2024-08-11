@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.client.GuiIngameForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -364,11 +365,24 @@ public class SecondGuiNewChat extends Gui {
     }
 
     public int getChatWidth() {
-        return calculateChatboxWidth(this.mc.gameSettings.chatWidth);
+        int chatWidth = calculateChatboxWidth(this.mc.gameSettings.chatWidth);
+        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.BOTTOM_RIGHT) {
+            int scaledWidth = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledWidth();
+            return Math.min(chatWidth, scaledWidth/2 - 20);
+        }else{
+            return chatWidth;
+        }
+
     }
 
     public int getChatHeight() {
-        return calculateChatboxHeight(this.getChatOpen() ? this.mc.gameSettings.chatHeightFocused : this.mc.gameSettings.chatHeightUnfocused);
+        int chatHeight = calculateChatboxHeight(this.getChatOpen() ? this.mc.gameSettings.chatHeightFocused : this.mc.gameSettings.chatHeightUnfocused);
+        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_RIGHT || SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_LEFT) {
+            int scaledHeight = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledHeight();
+            return Math.min(chatHeight, scaledHeight/2 - 20);
+        }else{
+            return chatHeight;
+        }
     }
 
     /**

@@ -5,12 +5,12 @@
   "refmap": "sabotador.mixins.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "GuiChatMixin",
-    "NetHandlerPlayClientMixin",
     "GameSettingsMixin",
+    "GuiChatMixin",
     "GuiIngameMixin",
-    "MinecraftMixin",
-    "GuiPlayerTabOverlayAccessor"
+    "GuiNewChatMixin",
+    "GuiPlayerTabOverlayAccessor",
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1
