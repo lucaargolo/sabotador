@@ -1,5 +1,6 @@
 package io.github.lucaargolo.sabotador.mixin;
 
+import io.github.lucaargolo.sabotador.SabotadorConfig;
 import io.github.lucaargolo.sabotador.SabotadorMod;
 import io.github.lucaargolo.sabotador.mixed.GuiIngameMixed;
 import net.minecraft.client.Minecraft;
@@ -20,15 +21,21 @@ public class NetHandlerPlayClientMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/S02PacketChat;getType()B", ordinal = 1), method = "handleChat", cancellable = true)
     public void captureSabMessages(S02PacketChat packetIn, CallbackInfo ci) {
-        if (SabotadorMod.isOnSabotador() && packetIn.getType() != 2) {
+        if (SabotadorMod.isOnSabotador() && SabotadorConfig.getConfig().isSecondChatEnabled() && packetIn.getType() != 2) {
             IChatComponent message = packetIn.getChatComponent();
             String u = message.getUnformattedText();
-            if(u.startsWith("[▲]") || u.startsWith("[?]") || u.startsWith("[▼]")) {
-                ((GuiIngameMixed) this.gameController.ingameGUI).getReverseChat().printChatMessage(message);
-                ci.cancel();
+            for (String s : SabotadorConfig.getConfig().getSecondChatFilter()) {
+                if(u.startsWith(s)) {
+                    ((GuiIngameMixed) this.gameController.ingameGUI).getSecondChat().printChatMessage(message);
+                    ci.cancel();
+                    break;
+                }
             }
-            if(u.startsWith("[✕]")) {
-                ((GuiIngameMixed) this.gameController.ingameGUI).getReverseChat().printChatMessage(message);
+            for (String s : SabotadorConfig.getConfig().getBothChatsFilter()) {
+                if(u.startsWith(s)) {
+                    ((GuiIngameMixed) this.gameController.ingameGUI).getSecondChat().printChatMessage(message);
+                    break;
+                }
             }
         }
     }

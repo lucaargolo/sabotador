@@ -16,7 +16,7 @@ public class GameSettingsMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiNewChat;refreshChat()V"), method = "setOptionFloatValue")
     public void onChatReset(CallbackInfo ci) {
-        ((GuiIngameMixed) this.mc.ingameGUI).getReverseChat().refreshChat();
+        ((GuiIngameMixed) this.mc.ingameGUI).getSecondChat().refreshChat();
     }
 
 }

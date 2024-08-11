@@ -1,7 +1,9 @@
 package io.github.lucaargolo.sabotador;
 
+import io.github.lucaargolo.sabotador.gui.SecondGuiNewChat;
 import io.github.lucaargolo.sabotador.mixed.GuiIngameMixed;
 import io.github.lucaargolo.sabotador.mixin.GuiPlayerTabOverlayAccessor;
+import io.github.lucaargolo.sabotador.utils.ScreenPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.FontRenderer;
@@ -21,13 +23,17 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
-@Mod(modid = SabotadorMod.MODID, useMetadata = true)
+@Mod(modid = SabotadorMod.MOD_ID, guiFactory = "io.github.lucaargolo.sabotador.SabotadorConfig", useMetadata = true)
 public class SabotadorMod {
 
-    public static final String MODID = "sabotador";
+    public static final String MOD_ID = "sabotador";
+    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
     private static Tuple<String, Integer> currentMinigame = null;
     private static boolean isOnSabotador = false;
     private static GameState gameState = GameState.NONE;
@@ -52,6 +58,8 @@ public class SabotadorMod {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
+        SabotadorConfig.load();
+        SabotadorConfig.getConfig().save();
     }
 
     @SubscribeEvent
@@ -80,23 +88,45 @@ public class SabotadorMod {
     @SubscribeEvent
     public void onChat(RenderGameOverlayEvent.Chat event) {
         Minecraft client = Minecraft.getMinecraft();
-        if(SabotadorMod.isOnSabotadorFast()) {
-            GlStateManager.pushMatrix();
+        if(SabotadorMod.isOnSabotadorFast() && SabotadorConfig.getConfig().isSecondChatEnabled()) {
+            ScreenPosition position = SabotadorConfig.getConfig().getChatPosition();
+            SecondGuiNewChat secondChat = ((GuiIngameMixed) client.ingameGUI).getSecondChat();
+            switch (position) {
+                case TOP_RIGHT:
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(event.resolution.getScaledWidth()-secondChat.getChatWidth()-event.posX, 0.0f, 0.0F);
+                    secondChat.drawChatReversed(client.ingameGUI.getUpdateCounter());
+                    GlStateManager.popMatrix();
+                    break;
+                case BOTTOM_RIGHT:
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(event.resolution.getScaledWidth()-secondChat.getChatWidth()-event.posX, event.posY, 0.0F);
+                    secondChat.drawChat(client.ingameGUI.getUpdateCounter());
+                    GlStateManager.popMatrix();
+                    break;
+                default:
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(event.posX, 0.0, 0.0F);
+                    secondChat.drawChatReversed(client.ingameGUI.getUpdateCounter());
+                    GlStateManager.popMatrix();
+                    break;
+            }
 
-            GlStateManager.translate(0.0F, 8.0, 0.0F);
-            ((GuiIngameMixed) client.ingameGUI).getReverseChat().drawChat(client.ingameGUI.getUpdateCounter());
-            GlStateManager.popMatrix();
         }
     }
 
     @SubscribeEvent
     public void onHud(RenderGameOverlayEvent.Post event) {
         if(event.type == RenderGameOverlayEvent.ElementType.CHAT) {
-            Minecraft client = Minecraft.getMinecraft();
-            FontRenderer textRenderer = client.fontRendererObj;
-            Tuple<String, Integer> currentMinigame = SabotadorMod.getCurrentMinigameFast();
-            if (currentMinigame != null) {
-                textRenderer.drawStringWithShadow("Você está jogando no " + currentMinigame.getFirst() + "-" + currentMinigame.getSecond(), 7, 7, 0x00FF00);
+            if(SabotadorConfig.getConfig().isServerIndicatorEnabled()) {
+                Minecraft client = Minecraft.getMinecraft();
+                FontRenderer textRenderer = client.fontRendererObj;
+                Tuple<String, Integer> currentMinigame = SabotadorMod.getCurrentMinigameFast();
+                if (currentMinigame != null) {
+                    IChatComponent chatComponent = new ChatComponentText(SabotadorConfig.getConfig().getIndicatorMessage());
+                    chatComponent.setChatStyle(chatComponent.getChatStyle().setColor(SabotadorConfig.getConfig().getIndicatorColor()));
+                    textRenderer.drawStringWithShadow(chatComponent.getFormattedText(), 7, 7, 0xFFFFFF);
+                }
             }
         }
     }
@@ -106,20 +136,26 @@ public class SabotadorMod {
         EntityPlayerSP player = client.thePlayer;
         if(player != null) {
             if (gameState == GameState.FINISHED) {
-                player.sendChatMessage("gg");
-                ChatComponentText separator = new ChatComponentText("══════════════════════════════");
-                separator.setChatStyle(separator.getChatStyle().setBold(true).setStrikethrough(true).setColor(EnumChatFormatting.DARK_GREEN));
-                ((GuiIngameMixed) client.ingameGUI).getReverseChat().printChatMessage(separator);
+                if(SabotadorConfig.getConfig().isAutoGGEnabled()) {
+                    player.sendChatMessage(SabotadorConfig.getConfig().getAutoGGMessage());
+                }
+                if(SabotadorConfig.getConfig().isSecondChatEnabled()) {
+                    ChatComponentText separator = new ChatComponentText("══════════════════════════════");
+                    separator.setChatStyle(separator.getChatStyle().setBold(true).setStrikethrough(true).setColor(EnumChatFormatting.DARK_GREEN));
+                    ((GuiIngameMixed) client.ingameGUI).getSecondChat().printChatMessage(separator);
+                }
             }else if(gameState == GameState.STARTED) {
-                Map<NetworkPlayerInfo, GameRole> gamePlayers = getGamePlayers();
-                NetworkPlayerInfo selfEntry = player.sendQueue.getPlayerInfo(player.getUniqueID());
-                GameRole currentRole = gamePlayers.getOrDefault(selfEntry, GameRole.NONE);
-                if(currentRole != GameRole.NONE && currentRole != GameRole.MORTO) {
-                    gamePlayers.forEach((entry, role) -> {
-                        if (role == GameRole.DETETIVE) {
-                            player.sendChatMessage("/c " + entry.getGameProfile().getName());
-                        }
-                    });
+                if(SabotadorConfig.getConfig().isAutoTrustDetEnabled()) {
+                    Map<NetworkPlayerInfo, GameRole> gamePlayers = getGamePlayers();
+                    NetworkPlayerInfo selfEntry = player.sendQueue.getPlayerInfo(player.getUniqueID());
+                    GameRole currentRole = gamePlayers.getOrDefault(selfEntry, GameRole.NONE);
+                    if(currentRole != GameRole.NONE && currentRole != GameRole.MORTO) {
+                        gamePlayers.forEach((entry, role) -> {
+                            if (role == GameRole.DETETIVE) {
+                                player.sendChatMessage("/c " + entry.getGameProfile().getName());
+                            }
+                        });
+                    }
                 }
             }
         }

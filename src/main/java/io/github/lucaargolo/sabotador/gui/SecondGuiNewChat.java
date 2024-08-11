@@ -3,6 +3,9 @@ package io.github.lucaargolo.sabotador.gui;
 import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
+
+import io.github.lucaargolo.sabotador.SabotadorConfig;
+import io.github.lucaargolo.sabotador.utils.ScreenPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
@@ -12,7 +15,7 @@ import net.minecraft.util.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ReverseGuiNewChat extends Gui {
+public class SecondGuiNewChat extends Gui {
 
     private static final Logger logger = LogManager.getLogger();
     private final Minecraft mc = Minecraft.getMinecraft();
@@ -35,39 +38,39 @@ public class ReverseGuiNewChat extends Gui {
                 }
 
                 float f1 = this.getChatScale();
-                int l = MathHelper.ceiling_float_int((float) this.getChatWidth() / f1);
+                int l = MathHelper.ceiling_float_int((float)this.getChatWidth() / f1);
                 GlStateManager.pushMatrix();
                 GlStateManager.translate(2.0F, 20.0F, 0.0F);
                 GlStateManager.scale(f1, f1, 1.0F);
 
                 for (int i1 = 0; i1 + this.scrollPos < this.drawnChatLines.size() && i1 < i; ++i1) {
-                    ChatLine chatline = this.drawnChatLines.get(this.drawnChatLines.size() - 1 - i1 - this.scrollPos);
+                    ChatLine chatline = this.drawnChatLines.get(i1 + this.scrollPos);
 
                     if (chatline != null) {
                         int j1 = updateCounter - chatline.getUpdatedCounter();
 
                         if (j1 < 200 || flag) {
-                            double d0 = (double) j1 / 200.0D;
+                            double d0 = (double)j1 / 200.0D;
                             d0 = 1.0D - d0;
                             d0 = d0 * 10.0D;
                             d0 = MathHelper.clamp_double(d0, 0.0D, 1.0D);
                             d0 = d0 * d0;
-                            int l1 = (int) (255.0D * d0);
+                            int l1 = (int)(255.0D * d0);
 
                             if (flag) {
                                 l1 = 255;
                             }
 
-                            l1 = (int) ((float) l1 * f);
+                            l1 = (int)((float)l1 * f);
                             ++j;
 
                             if (l1 > 3) {
                                 int i2 = 0;
-                                int j2 = i1 * 9; // Altera a direção do chat para desenhar de cima para baixo
+                                int j2 = -i1 * 9;
                                 drawRect(i2, j2 - 9, i2 + l + 4, j2, l1 / 2 << 24);
                                 String s = chatline.getChatComponent().getFormattedText();
                                 GlStateManager.enableBlend();
-                                this.mc.fontRendererObj.drawStringWithShadow(s, (float) i2, (float) (j2 - 8), 16777215 + (l1 << 24));
+                                this.mc.fontRendererObj.drawStringWithShadow(s, (float)i2, (float)(j2 - 8), 16777215 + (l1 << 24));
                                 GlStateManager.disableAlpha();
                                 GlStateManager.disableBlend();
                             }
@@ -86,8 +89,92 @@ public class ReverseGuiNewChat extends Gui {
                     if (l2 != i3) {
                         int k3 = j3 > 0 ? 170 : 96;
                         int l3 = this.isScrolled ? 13382451 : 3355562;
-                        drawRect(0, j3, 2, j3 + k1, l3 + (k3 << 24));
-                        drawRect(2, j3, 1, j3 + k1, 13421772 + (k3 << 24));
+                        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.BOTTOM_RIGHT) {
+                            int w = getChatWidth();
+                            drawRect(w-2, -j3, w, -j3 - k1, l3 + (k3 << 24));
+                            drawRect(w, -j3, w-1, -j3 - k1, 13421772 + (k3 << 24));
+                        }else {
+                            drawRect(0, -j3, 2, -j3 - k1, l3 + (k3 << 24));
+                            drawRect(2, -j3, 1, -j3 - k1, 13421772 + (k3 << 24));
+                        }
+                    }
+                }
+
+                GlStateManager.popMatrix();
+            }
+        }
+    }
+
+    public void drawChatReversed(int ticks) {
+        if (this.mc.gameSettings.chatVisibility != EntityPlayer.EnumChatVisibility.HIDDEN) {
+            int i = this.getLineCount();
+            boolean bl = false;
+            int j = 0;
+            int k = this.drawnChatLines.size();
+            float f = this.mc.gameSettings.chatOpacity * 0.9F + 0.1F;
+            if (k > 0) {
+                if (this.getChatOpen()) {
+                    bl = true;
+                }
+
+                float g = this.getChatScale();
+                int l = MathHelper.ceiling_float_int((float)this.getChatWidth() / g);
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(2.0F, 20.0F, 0.0F);
+                GlStateManager.scale(g, g, 1.0F);
+
+                // Start the rendering from the top
+                for (int m = 0; m + this.scrollPos < this.drawnChatLines.size() && m < i; m++) {
+                    ChatLine chatHudLine = this.drawnChatLines.get(m + this.scrollPos);
+                    if (chatHudLine != null) {
+                        int n = ticks - chatHudLine.getUpdatedCounter();
+                        if (n < 200 || bl) {
+                            double d = (double)n / 200.0;
+                            d = 1.0 - d;
+                            d *= 10.0;
+                            d = MathHelper.clamp_double(d, 0.0, 1.0);
+                            d *= d;
+                            int o = (int)(255.0 * d);
+                            if (bl) {
+                                o = 255;
+                            }
+
+                            o = (int)((float)o * f);
+                            j++;
+                            if (o > 3) {
+                                int p = 0;
+                                // Calculate q based on the message index to render from top to bottom
+                                int q = m * 9;
+                                drawRect(p, q, p + l + 4, q + 9, o / 2 << 24);
+                                String string = chatHudLine.getChatComponent().getFormattedText();
+                                GlStateManager.enableBlend();
+                                this.mc.fontRendererObj.drawStringWithShadow(string, (float)p, (float)(q + 1), 16777215 + (o << 24));
+                                GlStateManager.disableAlpha();
+                                GlStateManager.disableBlend();
+                            }
+                        }
+                    }
+                }
+
+                if (bl) {
+                    int mx = this.mc.fontRendererObj.FONT_HEIGHT;
+                    GlStateManager.translate(-3.0F, 0.0F, 0.0F);
+                    int r = k * mx + k;
+                    int n = j * mx + j;
+                    int s = this.scrollPos * n / k;
+                    int t = n * n / r;
+                    if (r != n) {
+                        int ox = s > 0 ? 170 : 96;
+                        int p = this.isScrolled ? 13382451 : 3355562;
+                        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_RIGHT) {
+                            int w = getChatWidth();
+                            drawRect(w-2, s, w, s + t, p + (ox << 24));
+                            drawRect(w, s, w-1, s + t, 13421772 + (ox << 24));
+                        }else{
+                            drawRect(0, s, 2, s + t, p + (ox << 24));
+                            drawRect(2, s, 1, s + t, 13421772 + (ox << 24));
+                        }
+
                     }
                 }
 
@@ -113,7 +200,7 @@ public class ReverseGuiNewChat extends Gui {
      */
     public void printChatMessageWithOptionalDeletion(IChatComponent chatComponent, int chatLineId) {
         this.setChatLine(chatComponent, chatLineId, this.mc.ingameGUI.getUpdateCounter(), false);
-        logger.info("[CHAT] " + chatComponent.getUnformattedText());
+        logger.info("[SAB] " + chatComponent.getUnformattedText());
     }
 
     private void setChatLine(IChatComponent chatComponent, int chatLineId, int updateCounter, boolean displayOnly) {

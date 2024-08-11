@@ -16,12 +16,12 @@ public class MinecraftMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiNewChat;clearChatMessages()V"), method = "displayGuiScreen")
     public void onSetScreenChatClear(CallbackInfo ci) {
-        ((GuiIngameMixed) this.ingameGUI).getReverseChat().clearChatMessages();
+        ((GuiIngameMixed) this.ingameGUI).getSecondChat().clearChatMessages();
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiNewChat;clearChatMessages()V"), method = "runTick")
     public void onTickChatClear(CallbackInfo ci) {
-        ((GuiIngameMixed) this.ingameGUI).getReverseChat().clearChatMessages();
+        ((GuiIngameMixed) this.ingameGUI).getSecondChat().clearChatMessages();
     }
 
 }

@@ -1,9 +1,9 @@
 package io.github.lucaargolo.sabotador.mixed;
 
-import io.github.lucaargolo.sabotador.gui.ReverseGuiNewChat;
+import io.github.lucaargolo.sabotador.gui.SecondGuiNewChat;
 
 public interface GuiIngameMixed {
 
-    ReverseGuiNewChat getReverseChat();
+    SecondGuiNewChat getSecondChat();
 
 }
