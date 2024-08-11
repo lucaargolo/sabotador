@@ -1,6 +1,7 @@
 package io.github.lucaargolo.sabotador.mixin;
 
 import io.github.lucaargolo.sabotador.SabotadorConfig;
+import io.github.lucaargolo.sabotador.SabotadorMod;
 import io.github.lucaargolo.sabotador.utils.ScreenPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiNewChat;
@@ -20,21 +21,24 @@ public class GuiNewChatMixin {
 
     @Inject(at = @At("RETURN"), method = "getChatWidth", cancellable = true)
     public void getChatWidth(CallbackInfoReturnable<Integer> cir) {
-        int chatWidth = cir.getReturnValue();
-        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.BOTTOM_RIGHT) {
-            int scaledWidth = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledWidth();
-            cir.setReturnValue(Math.min(chatWidth, scaledWidth/2 - 20));
+        if(SabotadorMod.isOnSabotadorFast() && SabotadorConfig.getConfig().isSecondChatEnabled()) {
+            int chatWidth = cir.getReturnValue();
+            if (SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.BOTTOM_RIGHT) {
+                int scaledWidth = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledWidth();
+                cir.setReturnValue(Math.min(chatWidth, scaledWidth / 2 - 20));
+            }
         }
-
     }
 
 
     @Inject(at = @At("RETURN"), method = "getChatHeight", cancellable = true)
     public void getChatHeight(CallbackInfoReturnable<Integer> cir) {
-        int chatHeight =  cir.getReturnValue();
-        if(SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_RIGHT || SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_LEFT) {
-            int scaledHeight = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledHeight();
-            cir.setReturnValue(Math.min(chatHeight, scaledHeight/2 - 20));
+        if(SabotadorMod.isOnSabotadorFast() && SabotadorConfig.getConfig().isSecondChatEnabled()) {
+            int chatHeight = cir.getReturnValue();
+            if (SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_RIGHT || SabotadorConfig.getConfig().getChatPosition() == ScreenPosition.TOP_LEFT) {
+                int scaledHeight = ((GuiIngameForge) this.mc.ingameGUI).getResolution().getScaledHeight();
+                cir.setReturnValue(Math.min(chatHeight, scaledHeight / 2 - 20));
+            }
         }
     }
 
