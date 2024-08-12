@@ -99,7 +99,7 @@ public class SabotadorConfig implements IModGuiFactory {
     @SuppressWarnings("UnstableApiUsage")
     public static void load() {
         SabotadorConfigGuiScreen.getConfigElements();
-        try (FileReader reader = new FileReader(CONFIG_PATH)) {
+        try (Reader reader = new InputStreamReader(Files.newInputStream(Paths.get(CONFIG_PATH)), StandardCharsets.UTF_8)) {
             Type mapType = new TypeToken<SabotadorConfig>(){}.getType();
             config = GSON.fromJson(reader, mapType);
         } catch (Exception e) {
