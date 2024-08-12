@@ -1,11 +1,12 @@
 package io.github.lucaargolo.sabotador;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,7 +89,7 @@ public class SabotadorConfig implements IModGuiFactory {
     }
 
     public void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_PATH)) {
+        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(Paths.get(CONFIG_PATH)), StandardCharsets.UTF_8)) {
             GSON.toJson(this, writer);
         } catch (Exception e) {
             SabotadorMod.LOGGER.error("[Sabotador] Failed to write config at: {}", CONFIG_PATH, e);
