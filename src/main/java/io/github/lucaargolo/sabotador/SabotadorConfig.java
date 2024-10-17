@@ -40,6 +40,10 @@ public class SabotadorConfig implements IModGuiFactory {
     private String autoGGMessage = "gg";
     private boolean autoTrustDetEnabled = true;
     private boolean secondChatEnabled = true;
+    private boolean autoDropUntrust = false;
+    private boolean autoDropTrust = false;
+    private boolean autoDropNeutral = false;
+    private boolean autoDropShop = false;
     private ScreenPosition chatPosition = ScreenPosition.TOP_LEFT;
     private String[] secondChatFilter = new String[]{"[▲]", "[?]", "[▼]"};
     private String[] bothChatsFilter = new String[]{"[✕]"};
@@ -74,6 +78,22 @@ public class SabotadorConfig implements IModGuiFactory {
 
     public boolean isSecondChatEnabled() {
         return secondChatEnabled;
+    }
+
+    public boolean isAutoDropUntrust() {
+        return autoDropUntrust;
+    }
+
+    public boolean isAutoDropTrust() {
+        return autoDropTrust;
+    }
+
+    public boolean isAutoDropNeutral() {
+        return autoDropNeutral;
+    }
+
+    public boolean isAutoDropShop() {
+        return autoDropShop;
     }
 
     public ScreenPosition getChatPosition() {
@@ -150,6 +170,11 @@ public class SabotadorConfig implements IModGuiFactory {
         private static final Property secondChatFilterProperty = new Property("Second Chat Filter", config.secondChatFilter, Property.Type.STRING);
         private static final Property bothChatsFilterProperty = new Property("Both Chats Filter", config.bothChatsFilter, Property.Type.STRING);
 
+        private static final Property autoDropUntrustProperty = new Property("Auto Drop Untrust", Boolean.toString(config.autoDropUntrust), Property.Type.BOOLEAN);
+        private static final Property autoDropTrustProperty = new Property("Auto Drop Trust", Boolean.toString(config.autoDropTrust), Property.Type.BOOLEAN);
+        private static final Property autoDropNeutralProperty = new Property("Auto Drop Neutral", Boolean.toString(config.autoDropNeutral), Property.Type.BOOLEAN);
+        private static final Property autoDropShopProperty = new Property("Auto Drop Shop", Boolean.toString(config.autoDropShop), Property.Type.BOOLEAN);
+
 
         public SabotadorConfigGuiScreen(GuiScreen parent) {
             super(parent, getConfigElements(), SabotadorMod.MOD_ID, false, false, "Sabotador Helper Config");
@@ -178,7 +203,14 @@ public class SabotadorConfig implements IModGuiFactory {
             list.add(new ConfigElement(secondChatFilterProperty));
             bothChatsFilterProperty.set(config.bothChatsFilter);
             list.add(new ConfigElement(bothChatsFilterProperty));
-
+            autoDropUntrustProperty.set(config.autoDropUntrust);
+            list.add(new ConfigElement(autoDropUntrustProperty));
+            autoDropTrustProperty.set(config.autoDropTrust);
+            list.add(new ConfigElement(autoDropTrustProperty));
+            autoDropNeutralProperty.set(config.autoDropNeutral);
+            list.add(new ConfigElement(autoDropNeutralProperty));;
+            autoDropShopProperty.set(config.autoDropShop);
+            list.add(new ConfigElement(autoDropShopProperty));
             return list;
         }
 
@@ -195,6 +227,11 @@ public class SabotadorConfig implements IModGuiFactory {
             config.chatPosition = ScreenPosition.valueOf(chatPositionProperty.getString());
             config.secondChatFilter = secondChatFilterProperty.getStringList();
             config.bothChatsFilter = bothChatsFilterProperty.getStringList();
+            config.autoDropUntrust = autoDropUntrustProperty.getBoolean();
+            config.autoDropTrust = autoDropTrustProperty.getBoolean();
+            config.autoDropNeutral = autoDropNeutralProperty.getBoolean();
+            config.autoDropShop = autoDropShopProperty.getBoolean();
+
             config.save();
         }
     }

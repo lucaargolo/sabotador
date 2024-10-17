@@ -3,6 +3,7 @@ package io.github.lucaargolo.sabotador;
 import io.github.lucaargolo.sabotador.gui.SecondGuiNewChat;
 import io.github.lucaargolo.sabotador.mixed.GuiIngameMixed;
 import io.github.lucaargolo.sabotador.mixin.GuiPlayerTabOverlayAccessor;
+import io.github.lucaargolo.sabotador.mixin.PlayerControllerMPAccessor;
 import io.github.lucaargolo.sabotador.utils.ScreenPosition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -159,13 +160,34 @@ public class SabotadorMod {
         EntityPlayerSP player = client.thePlayer;
         if(player != null) {
             if (gameState == GameState.FINISHED) {
-                if(SabotadorConfig.getConfig().isAutoGGEnabled()) {
+                if (SabotadorConfig.getConfig().isAutoGGEnabled()) {
                     player.sendChatMessage(SabotadorConfig.getConfig().getAutoGGMessage());
                 }
-                if(SabotadorConfig.getConfig().isSecondChatEnabled()) {
+                if (SabotadorConfig.getConfig().isSecondChatEnabled()) {
                     ChatComponentText separator = new ChatComponentText("══════════════════════════════");
                     separator.setChatStyle(separator.getChatStyle().setBold(true).setStrikethrough(true).setColor(EnumChatFormatting.DARK_GREEN));
                     ((GuiIngameMixed) client.ingameGUI).getSecondChat().printChatMessage(separator);
+                }
+            }else if(gameState == GameState.STARTING) {
+                if(SabotadorConfig.getConfig().isAutoDropUntrust()) {
+                    player.inventory.currentItem = 5;
+                    ((PlayerControllerMPAccessor) client.playerController).invokeSyncCurrentPlayItem();
+                    player.dropOneItem(false);
+                }
+                if(SabotadorConfig.getConfig().isAutoDropTrust()) {
+                    player.inventory.currentItem = 6;
+                    ((PlayerControllerMPAccessor) client.playerController).invokeSyncCurrentPlayItem();
+                    player.dropOneItem(false);
+                }
+                if(SabotadorConfig.getConfig().isAutoDropNeutral()) {
+                    player.inventory.currentItem = 7;
+                    ((PlayerControllerMPAccessor) client.playerController).invokeSyncCurrentPlayItem();
+                    player.dropOneItem(false);
+                }
+                if(SabotadorConfig.getConfig().isAutoDropShop()) {
+                    player.inventory.currentItem = 8;
+                    ((PlayerControllerMPAccessor) client.playerController).invokeSyncCurrentPlayItem();
+                    player.dropOneItem(false);
                 }
             }else if(gameState == GameState.STARTED) {
                 if(SabotadorConfig.getConfig().isAutoTrustDetEnabled()) {
@@ -206,17 +228,17 @@ public class SabotadorMod {
         ScorePlayerTeam team = entry.getPlayerTeam();
         GameRole role;
         if(team != null) {
-            String prefix = team.getColorPrefix().replaceAll("§.", "");
-            if(prefix.startsWith("Morto")) {
+            String name = team.getTeamName();
+            if(name.contains("spectator") || name.contains("dead")) {
                 role = GameRole.MORTO;
-            }else if(prefix.startsWith("Suspeito")) {
-                role = GameRole.SUSPEITO;
-            }else if(prefix.startsWith("Detetive")) {
+            }else if(name.contains("det")) {
                 role = GameRole.DETETIVE;
-            }else if(prefix.startsWith("Inocente")) {
+            }else if(name.contains("ino")) {
                 role = GameRole.INOCENTE;
-            }else if(prefix.startsWith("Sabotador")) {
+            }else if(name.startsWith("sab")) {
                 role = GameRole.SABOTADOR;
+            }else if(name.contains("sus") || name.contains("trusted") || name.contains("untrusted")) {
+                role = GameRole.SUSPEITO;
             }else{
                 role = GameRole.NONE;
             }
