@@ -235,7 +235,7 @@ public class SabotadorMod {
                 role = GameRole.DETETIVE;
             }else if(name.contains("ino")) {
                 role = GameRole.INOCENTE;
-            }else if(name.startsWith("sab")) {
+            }else if(name.contains("sab")) {
                 role = GameRole.SABOTADOR;
             }else if(name.contains("sus") || name.contains("trusted") || name.contains("untrusted")) {
                 role = GameRole.SUSPEITO;
@@ -298,7 +298,7 @@ public class SabotadorMod {
             String f = footer.getFormattedText().replaceAll("§.", "");
             String[] s1 = f.split("\n");
             if(s1.length > 2) {
-                String[] s2 = s1[2].split("┃");
+                String[] s2 = s1[s1.length-1].split("┃");
                 if(s2.length > 1) {
                     String[] s3 = s2[0].split("-");
                     if(s3.length > 1) {
